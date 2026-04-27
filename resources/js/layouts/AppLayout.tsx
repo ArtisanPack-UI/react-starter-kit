@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { Link, router, usePage } from '@inertiajs/react';
 import { Sidebar, Navbar } from '@artisanpack-ui/react/navigation';
 import { Icon } from '@artisanpack-ui/react/utility';
-import { InertiaToastProvider } from '@artisanpack-ui/react-laravel/feedback';
+import { InertiaToastProvider } from '@/lib/InertiaToastProvider';
 import { AppLogo, AppLogoIcon } from '@/components/AppLogo';
 
 const MENU_ICON = 'M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5';

@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { Link } from '@inertiajs/react';
-import { InertiaToastProvider } from '@artisanpack-ui/react-laravel/feedback';
+import { InertiaToastProvider } from '@/lib/InertiaToastProvider';
 import { AppLogo } from '@/components/AppLogo';
 
 export interface AuthLayoutProps {
