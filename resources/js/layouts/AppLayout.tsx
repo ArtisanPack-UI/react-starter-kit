@@ -97,6 +97,7 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 open={open}
                 onOpenChange={setOpen}
                 width="w-72"
+                className="lg:drawer-open"
                 sidebarContent={<SidebarContent user={auth.user} currentPath={currentPath} onNavigate={() => setOpen(false)} />}
             >
                 <div className="min-h-screen flex flex-col bg-base-200">
