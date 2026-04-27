@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:laravelmodules.com)",
+      "WebFetch(domain:github.com)",
+      "Bash(vendor/bin/pint:*)",
+      "Bash(php artisan make:test:*)",
+      "Bash(php artisan test:*)",
+      "Bash(find:*)",
+      "Bash(git log:*)",
+      "Bash(cat:*)",
+      "mcp__laravel-boost__application-info",
+      "Bash(grep:*)",
+      "Bash(composer show:*)",
+      "Bash(composer update:*)",
+      "Bash(php artisan view:clear:*)",
+      "mcp__laravel-boost__tinker",
+      "Bash(php artisan:*)",
+      "mcp__laravel-boost__search-docs",
+      "WebFetch(domain:packagist.org)",
+      "Bash(curl:*)",
+      "Bash(git -C /Users/jacobmartella/Herd/livewire-starter-kit ls-files:*)",
+      "mcp__herd__find_available_services"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "laravel-boost",
+    "herd"
+  ]
+}
