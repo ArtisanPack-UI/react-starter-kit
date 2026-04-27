@@ -1,4 +1,6 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import type { ReactNode } from 'react';
+import { Head, usePage } from '@inertiajs/react';
+import AppLayout from '@/layouts/AppLayout';
 
 interface AuthUser {
     name: string;
@@ -15,37 +17,32 @@ export default function Dashboard() {
     return (
         <>
             <Head title="Dashboard" />
-            <main className="min-h-screen bg-base-200 p-6">
-                <div className="max-w-6xl mx-auto space-y-6">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h1 className="text-2xl font-semibold">Dashboard</h1>
-                            <p className="text-base-content/70 text-sm">
-                                Welcome back{auth.user ? `, ${auth.user.name}` : ''}.
-                            </p>
-                        </div>
-                        <Link href="/settings/profile" className="btn btn-ghost btn-sm">
-                            Settings
-                        </Link>
-                    </div>
+            <div className="p-6 space-y-6 max-w-6xl mx-auto">
+                <div>
+                    <h1 className="text-2xl font-semibold">Dashboard</h1>
+                    <p className="text-base-content/70 text-sm">
+                        Welcome back{auth.user ? `, ${auth.user.name}` : ''}.
+                    </p>
+                </div>
 
-                    <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                        {[0, 1, 2].map((i) => (
-                            <div key={i} className="card bg-base-100 shadow aspect-video">
-                                <div className="card-body items-center justify-center text-base-content/40 text-sm">
-                                    Placeholder
-                                </div>
+                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+                    {[0, 1, 2].map((i) => (
+                        <div key={i} className="card bg-base-100 shadow aspect-video">
+                            <div className="card-body items-center justify-center text-base-content/40 text-sm">
+                                Placeholder
                             </div>
-                        ))}
-                    </div>
-
-                    <div className="card bg-base-100 shadow min-h-64">
-                        <div className="card-body items-center justify-center text-base-content/40">
-                            Main panel placeholder
                         </div>
+                    ))}
+                </div>
+
+                <div className="card bg-base-100 shadow min-h-64">
+                    <div className="card-body items-center justify-center text-base-content/40">
+                        Main panel placeholder
                     </div>
                 </div>
-            </main>
+            </div>
         </>
     );
 }
+
+Dashboard.layout = (page: ReactNode) => <AppLayout>{page}</AppLayout>;
