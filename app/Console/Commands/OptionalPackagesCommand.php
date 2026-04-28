@@ -46,26 +46,9 @@ class OptionalPackagesCommand extends Command
 
         if (! empty($packages)) {
             $this->info('Installing selected optional packages...');
-            $packagesForCommand = $packages;
-
-            $command = 'composer require '.implode(' ', $packagesForCommand).' --with-all-dependencies';
+            $command = 'composer require '.implode(' ', $packages).' --with-all-dependencies';
             shell_exec($command);
             $this->info('Optional packages installed successfully.');
-        }
-
-        $npmPackages = multiselect(
-            __('Which optional npm packages would you like to install?'),
-            [
-                '@artisanpack-ui/livewire-drag-and-drop',
-            ]
-        );
-
-        if (! empty($npmPackages)) {
-            $this->info('Installing selected optional npm packages...');
-            $npmPackagesForCommand = $npmPackages;
-            $command = 'npm install '.implode(' ', $npmPackagesForCommand);
-            shell_exec($command);
-            $this->info('Optional npm packages installed successfully.');
         }
 
         $useModularStructure = confirm(
@@ -130,18 +113,15 @@ class OptionalPackagesCommand extends Command
      */
     protected function setupModularStructure(): void
     {
-        // Install Laravel Modules package
+        // Install Laravel Modules package. The mhmiton/laravel-modules-livewire
+        // adapter is intentionally not installed here — it's Livewire-specific
+        // and there's no Inertia equivalent.
         $this->info('Installing nwidart/laravel-modules package...');
         shell_exec('composer require nwidart/laravel-modules --with-all-dependencies');
-
-        // Install Laravel Modules Livewire package
-        $this->info('Installing mhmiton/laravel-modules-livewire package...');
-        shell_exec('composer require mhmiton/laravel-modules-livewire --with-all-dependencies');
 
         // Publish configuration files
         $this->info('Publishing module configuration files...');
         shell_exec('php artisan vendor:publish --provider="Nwidart\Modules\LaravelModulesServiceProvider"');
-        shell_exec('php artisan vendor:publish --tag=modules-livewire-config');
 
         // Update composer.json for module autoloading
         $this->info('Updating composer.json for module autoloading...');

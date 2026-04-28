@@ -3,7 +3,6 @@
 test('command runs successfully without modular structure', function () {
     $this->artisan('artisanpack:optional-packages-command')
         ->expectsQuestion(__('Which optional packages would you like to install?'), [])
-        ->expectsQuestion(__('Which optional npm packages would you like to install?'), [])
         ->expectsConfirmation(__('Would you like to use a modular Laravel structure?'), 'no')
         ->assertExitCode(0);
 });
