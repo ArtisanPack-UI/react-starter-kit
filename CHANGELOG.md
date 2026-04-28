@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-04-28
+
+First stable release. The kit pivots the original `livewire-starter-kit` to a Laravel + Inertia.js + React stack using the ArtisanPack UI ecosystem.
+
 ### Added
 
 - **Inertia.js v2** wired in via `inertiajs/inertia-laravel` and a `HandleInertiaRequests` middleware that shares `auth.user`, `flash`, `errors`, app `name`, and an Inspiring quote with every page.
@@ -18,7 +22,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Toast bridge** — local `InertiaToastProvider` (`resources/js/lib/InertiaToastProvider.tsx`) listens to flash shared props and surfaces them as toasts. Inlined locally to avoid an upstream root-import bug in `@artisanpack-ui/react-laravel/feedback`.
 - **Wayfinder** for typed route helpers — `laravel/wayfinder` + `@laravel/vite-plugin-wayfinder`. Output (`resources/js/{actions,routes}/`) is regenerated on dev/build and during `composer create-project` via `post-create-project-cmd`. Smoke-test usage in `pages/auth/Login.tsx`.
 - **ESLint + Prettier** configs mirroring the upstream `@artisanpack-ui/react` monorepo. npm scripts: `lint`, `lint:fix`, `format`, `format:check`, `type-check`.
-- **Test suite** ported to Inertia (`Inertia\Testing\AssertableInertia`). 33 tests / 168 assertions covering all auth pages, settings, dashboard, welcome, and the optional-packages command. CI workflow runs on push and PR to `main`.
+- **Test suite** ported to Inertia (`Inertia\Testing\AssertableInertia`). 33 tests / 168 assertions covering all auth pages, settings, dashboard, welcome, and the optional-packages command.
+- **GitHub workflows** (mirrored from `artisanpack-ui/media-library`):
+    - `ci.yml` — Pint + ESLint + Prettier + tsc + Pest, on push/PR to `main` and `release/*`
+    - `release.yml` — runs tests on `v*` tags, creates the GitHub release from the matching CHANGELOG section, then notifies Packagist
+    - `auto-milestone.yml` — auto-assigns new issues to the org-shared milestone workflow
+    - `claude.yml`, `claude-code-review.yml` — Claude Code wiring (disabled by default)
 - **Optional packages prompt** rewritten — drops the npm prompt entirely (was Livewire-only) and removes the `mhmiton/laravel-modules-livewire` step from the modular setup; `nwidart/laravel-modules` install + default Admin/Auth/Users module scaffold remain.
 - **Docs** rewritten end-to-end (`docs/*.md`) for the Inertia + React stack.
 
@@ -27,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Livewire / Volt — `livewire/livewire`, `livewire/volt`, `artisanpack-ui/livewire-ui-components`, `App\Livewire\*`, all Volt single-file components, `app/Providers/VoltServiceProvider.php`.
 - `ThemeSetupCommand` — depended on `artisanpack:generate-theme` which lived in `livewire-ui-components`. Theming will be re-wired against `@artisanpack-ui/tokens` in a future release.
 - `tests/Feature/Console/InstallationTest.php` — referenced removed Livewire artifacts.
+
+[1.0.0]: https://github.com/ArtisanPack-UI/react-starter-kit/releases/tag/v1.0.0
 
 ## [0.1.0-dev]
 
