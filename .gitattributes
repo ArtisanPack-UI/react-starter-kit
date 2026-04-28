@@ -22,8 +22,3 @@ CLAUDE.md export-ignore
 CONTRIBUTING.md export-ignore
 phpunit.xml export-ignore
 README.md export-ignore
-
-# Exclude build and dependency files
-package.json export-ignore
-package-lock.json export-ignore
-vite.config.js export-ignore
