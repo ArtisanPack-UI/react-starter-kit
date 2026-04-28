@@ -2,6 +2,7 @@ import { usePage } from '@inertiajs/react';
 
 interface SharedProps {
     name: string;
+    [key: string]: unknown;
 }
 
 export function AppLogoIcon({ className }: { className?: string }) {

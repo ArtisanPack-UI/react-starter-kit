@@ -76,7 +76,9 @@ export default function Register() {
 
                     <div className="text-center text-sm mt-4 text-base-content/70">
                         Already registered?{' '}
-                        <Link href="/login" className="link link-primary">Log in</Link>
+                        <Link href="/login" className="link link-primary">
+                            Log in
+                        </Link>
                     </div>
                 </div>
             </div>

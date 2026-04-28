@@ -11,7 +11,9 @@ createServer((page) =>
         render: ReactDOMServer.renderToString,
         title: (title) => (title ? `${title} - ${appName}` : appName),
         resolve: (name) => {
-            const pages = import.meta.glob<{ default: ReactNode }>('./pages/**/*.tsx', { eager: true });
+            const pages = import.meta.glob<{ default: ReactNode }>('./pages/**/*.tsx', {
+                eager: true,
+            });
             const found = pages[`./pages/${name}.tsx`];
             if (!found) {
                 throw new Error(`Inertia page not found: ./pages/${name}.tsx`);
@@ -19,5 +21,5 @@ createServer((page) =>
             return found;
         },
         setup: ({ App, props }) => <App {...props} />,
-    })
+    }),
 );

@@ -9,6 +9,7 @@ interface AuthUser {
 
 interface SharedProps {
     auth: { user: AuthUser | null };
+    [key: string]: unknown;
 }
 
 export default function Dashboard() {

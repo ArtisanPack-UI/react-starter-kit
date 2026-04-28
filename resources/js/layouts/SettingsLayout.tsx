@@ -22,7 +22,10 @@ export default function SettingsLayout({ children }: SettingsLayoutProps) {
                     <ul className="menu bg-base-100 rounded-box shadow w-full">
                         {TABS.map((tab) => (
                             <li key={tab.href}>
-                                <Link href={tab.href} className={currentPath === tab.href ? 'menu-active' : ''}>
+                                <Link
+                                    href={tab.href}
+                                    className={currentPath === tab.href ? 'menu-active' : ''}
+                                >
                                     {tab.label}
                                 </Link>
                             </li>

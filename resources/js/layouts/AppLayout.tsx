@@ -16,6 +16,7 @@ interface AuthUser {
 
 interface SharedProps {
     auth: { user: AuthUser | null };
+    [key: string]: unknown;
 }
 
 interface NavItem {
@@ -33,7 +34,15 @@ function isActive(currentPath: string, href: string) {
     return currentPath.startsWith(href.replace(/\/profile$/, ''));
 }
 
-function SidebarContent({ user, currentPath, onNavigate }: { user: AuthUser | null; currentPath: string; onNavigate: () => void }) {
+function SidebarContent({
+    user,
+    currentPath,
+    onNavigate,
+}: {
+    user: AuthUser | null;
+    currentPath: string;
+    onNavigate: () => void;
+}) {
     return (
         <div className="flex flex-col h-full gap-4">
             <div className="px-2 pt-2">
@@ -64,7 +73,9 @@ function SidebarContent({ user, currentPath, onNavigate }: { user: AuthUser | nu
                         </div>
                         <div className="min-w-0 flex-1">
                             <div className="text-sm font-medium truncate">{user.name}</div>
-                            <div className="text-xs text-base-content/60 truncate">{user.email}</div>
+                            <div className="text-xs text-base-content/60 truncate">
+                                {user.email}
+                            </div>
                         </div>
                         <button
                             type="button"
@@ -98,7 +109,13 @@ export default function AppLayout({ children }: AppLayoutProps) {
                 onOpenChange={setOpen}
                 width="w-72"
                 className="lg:drawer-open"
-                sidebarContent={<SidebarContent user={auth.user} currentPath={currentPath} onNavigate={() => setOpen(false)} />}
+                sidebarContent={
+                    <SidebarContent
+                        user={auth.user}
+                        currentPath={currentPath}
+                        onNavigate={() => setOpen(false)}
+                    />
+                }
             >
                 <div className="min-h-screen flex flex-col bg-base-200">
                     <Navbar

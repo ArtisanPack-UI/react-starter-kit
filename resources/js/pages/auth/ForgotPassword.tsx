@@ -41,7 +41,9 @@ export default function ForgotPassword({ status }: ForgotPasswordProps) {
                         />
 
                         <div className="flex items-center justify-between mt-2">
-                            <Link href="/login" className="link link-primary text-sm">Back to login</Link>
+                            <Link href="/login" className="link link-primary text-sm">
+                                Back to login
+                            </Link>
                             <Button type="submit" color="primary" loading={form.processing}>
                                 Email password reset link
                             </Button>

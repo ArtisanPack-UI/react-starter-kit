@@ -1,4 +1,4 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import { Head } from '@inertiajs/react';
 import SettingsLayout from '@/layouts/SettingsLayout';
 
@@ -6,28 +6,32 @@ type Mode = 'light' | 'dark' | 'system';
 
 const STORAGE_KEY = 'theme';
 
+function readSavedMode(): Mode {
+    if (typeof window === 'undefined') return 'system';
+    return (window.localStorage.getItem(STORAGE_KEY) as Mode | null) ?? 'system';
+}
+
 function applyTheme(mode: Mode) {
+    if (typeof window === 'undefined') return;
     const resolved =
         mode === 'system'
             ? window.matchMedia('(prefers-color-scheme: dark)').matches
                 ? 'dark'
                 : 'light'
             : mode;
-    document.documentElement.setAttribute('data-theme', resolved);
+    window.document.documentElement.setAttribute('data-theme', resolved);
 }
 
 export default function Appearance() {
-    const [mode, setMode] = useState<Mode>('system');
-
-    useEffect(() => {
-        const saved = (localStorage.getItem(STORAGE_KEY) as Mode | null) ?? 'system';
-        setMode(saved);
+    const [mode, setMode] = useState<Mode>(() => {
+        const saved = readSavedMode();
         applyTheme(saved);
-    }, []);
+        return saved;
+    });
 
     function pick(next: Mode) {
         setMode(next);
-        localStorage.setItem(STORAGE_KEY, next);
+        window.localStorage.setItem(STORAGE_KEY, next);
         applyTheme(next);
     }
 

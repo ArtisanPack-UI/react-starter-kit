@@ -60,7 +60,10 @@ export default function Login({ canResetPassword, status }: LoginProps) {
 
                         <div className="flex items-center justify-between mt-2">
                             {canResetPassword && (
-                                <Link href={passwordRequest().url} className="link link-primary text-sm">
+                                <Link
+                                    href={passwordRequest().url}
+                                    className="link link-primary text-sm"
+                                >
                                     Forgot your password?
                                 </Link>
                             )}
@@ -72,7 +75,9 @@ export default function Login({ canResetPassword, status }: LoginProps) {
 
                     <div className="text-center text-sm mt-4 text-base-content/70">
                         Don&apos;t have an account?{' '}
-                        <Link href={register().url} className="link link-primary">Sign up</Link>
+                        <Link href={register().url} className="link link-primary">
+                            Sign up
+                        </Link>
                     </div>
                 </div>
             </div>

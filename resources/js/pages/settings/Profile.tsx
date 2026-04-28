@@ -12,6 +12,7 @@ interface AuthUser {
 interface SharedProps {
     auth: { user: AuthUser };
     flash: { success?: string };
+    [key: string]: unknown;
 }
 
 interface ProfileProps {

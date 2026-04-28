@@ -5,6 +5,7 @@ import SettingsLayout from '@/layouts/SettingsLayout';
 
 interface SharedProps {
     flash: { success?: string };
+    [key: string]: unknown;
 }
 
 export default function Password() {
