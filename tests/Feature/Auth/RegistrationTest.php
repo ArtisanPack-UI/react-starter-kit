@@ -1,26 +1,20 @@
 <?php
 
-use Livewire\Volt\Volt;
-
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Inertia\Testing\AssertableInertia as Assert;
 
 test('registration screen can be rendered', function () {
-    $response = $this->get('/register');
-
-    $response->assertStatus(200);
+    $this->get('/register')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('auth/Register'));
 });
 
 test('new users can register', function () {
-    $response = Volt::test('auth.register')
-        ->set('name', 'Test User')
-        ->set('email', 'test@example.com')
-        ->set('password', 'password')
-        ->set('password_confirmation', 'password')
-        ->call('register');
-
-    $response
-        ->assertHasNoErrors()
-        ->assertRedirect(route('dashboard', absolute: false));
+    $this->post('/register', [
+        'name' => 'Test User',
+        'email' => 'test@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ])->assertRedirect(route('dashboard', absolute: false));
 
     $this->assertAuthenticated();
 });

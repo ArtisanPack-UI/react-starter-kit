@@ -4,15 +4,15 @@ use App\Models\User;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\URL;
-
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+use Inertia\Testing\AssertableInertia as Assert;
 
 test('email verification screen can be rendered', function () {
     $user = User::factory()->unverified()->create();
 
-    $response = $this->actingAs($user)->get('/verify-email');
-
-    $response->assertStatus(200);
+    $this->actingAs($user)
+        ->get('/verify-email')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->component('auth/VerifyEmail'));
 });
 
 test('email can be verified', function () {
@@ -26,12 +26,13 @@ test('email can be verified', function () {
         ['id' => $user->id, 'hash' => sha1($user->email)]
     );
 
-    $response = $this->actingAs($user)->get($verificationUrl);
+    $this->actingAs($user)
+        ->get($verificationUrl)
+        ->assertRedirect(route('dashboard', absolute: false).'?verified=1');
 
     Event::assertDispatched(Verified::class);
 
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
 });
 
 test('email is not verified with invalid hash', function () {
