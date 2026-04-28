@@ -4,6 +4,9 @@
 /public/hot
 /public/storage
 /bootstrap/ssr
+/resources/js/actions
+/resources/js/routes
+/resources/js/wayfinder
 /storage/*.key
 /storage/pail
 /vendor

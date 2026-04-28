@@ -2,6 +2,9 @@ import type { ReactNode } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
 import { Button, Checkbox, Input } from '@artisanpack-ui/react/form';
 import AuthLayout from '@/layouts/AuthLayout';
+import { register } from '@/routes';
+import { request as passwordRequest } from '@/routes/password';
+import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
 
 interface LoginProps {
     canResetPassword: boolean;
@@ -13,7 +16,9 @@ export default function Login({ canResetPassword, status }: LoginProps) {
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        form.post('/login', { onFinish: () => form.reset('password') });
+        form.post(AuthenticatedSessionController.store().url, {
+            onFinish: () => form.reset('password'),
+        });
     }
 
     return (
@@ -55,7 +60,7 @@ export default function Login({ canResetPassword, status }: LoginProps) {
 
                         <div className="flex items-center justify-between mt-2">
                             {canResetPassword && (
-                                <Link href="/forgot-password" className="link link-primary text-sm">
+                                <Link href={passwordRequest().url} className="link link-primary text-sm">
                                     Forgot your password?
                                 </Link>
                             )}
@@ -67,7 +72,7 @@ export default function Login({ canResetPassword, status }: LoginProps) {
 
                     <div className="text-center text-sm mt-4 text-base-content/70">
                         Don&apos;t have an account?{' '}
-                        <Link href="/register" className="link link-primary">Sign up</Link>
+                        <Link href={register().url} className="link link-primary">Sign up</Link>
                     </div>
                 </div>
             </div>
