@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-04-28
+
+### Fixed
+
+- `package.json`, `package-lock.json`, and `vite.config.js` are no longer marked `export-ignore` in `.gitattributes`. Previously these files were stripped from `composer create-project` / `laravel new` installs, breaking `npm run build` with `ENOENT: no such file or directory, open '.../package.json'`.
+
 ## [1.0.0] - 2026-04-28
 
 First stable release. The kit pivots the original `livewire-starter-kit` to a Laravel + Inertia.js + React stack using the ArtisanPack UI ecosystem.
@@ -37,6 +43,7 @@ First stable release. The kit pivots the original `livewire-starter-kit` to a La
 - `ThemeSetupCommand` — depended on `artisanpack:generate-theme` which lived in `livewire-ui-components`. Theming will be re-wired against `@artisanpack-ui/tokens` in a future release.
 - `tests/Feature/Console/InstallationTest.php` — referenced removed Livewire artifacts.
 
+[1.0.1]: https://github.com/ArtisanPack-UI/react-starter-kit/releases/tag/v1.0.1
 [1.0.0]: https://github.com/ArtisanPack-UI/react-starter-kit/releases/tag/v1.0.0
 
 ## [0.1.0-dev]
