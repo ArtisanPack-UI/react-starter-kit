@@ -1,302 +1,105 @@
----
-title: Authentication
----
-
 # Authentication
 
-The Livewire Starter Kit includes a complete authentication system with modern features and security best practices.
+The kit ships a complete auth flow built on the standard Laravel pattern: controllers + Form Requests + Inertia pages. No external auth packages.
 
-## Overview
+## What's included
 
-The authentication system provides:
+| Flow | Route(s) | Controller | Page |
+|---|---|---|---|
+| Login | `GET\|POST /login` | `AuthenticatedSessionController` | `auth/Login` |
+| Register | `GET\|POST /register` | `RegisteredUserController` | `auth/Register` |
+| Forgot password | `GET\|POST /forgot-password` | `PasswordResetLinkController` | `auth/ForgotPassword` |
+| Reset password | `GET\|POST /reset-password` | `NewPasswordController` | `auth/ResetPassword` |
+| Verify email (prompt) | `GET /verify-email` | `EmailVerificationPromptController` | `auth/VerifyEmail` |
+| Verify email (link) | `GET /verify-email/{id}/{hash}` | `VerifyEmailController` | — (redirect) |
+| Resend verification | `POST /email/verification-notification` | `EmailVerificationNotificationController` | — |
+| Confirm password | `GET\|POST /confirm-password` | `ConfirmablePasswordController` | `auth/ConfirmPassword` |
+| Logout | `POST /logout` | `AuthenticatedSessionController@destroy` | — |
 
-- **User Registration** with email verification
-- **Login and Logout** functionality
-- **Password Reset** via email
-- **Profile Management** with settings
-- **Email Verification** for new accounts
-- **Session Management** and security
-- **Remember Me** functionality
+All routes live in `routes/auth.php`, included from `routes/web.php`.
 
-## Quick Start
+## Controllers + Form Requests
 
-The authentication system is ready to use out of the box. Users can:
-
-1. Register new accounts at `/register`
-2. Login at `/login`
-3. Reset passwords at `/forgot-password`
-4. Verify emails via sent links
-5. Manage profiles at `/settings/profile`
-
-## Authentication Routes
-
-All authentication routes are defined in `routes/auth.php`:
+The login flow uses a dedicated `LoginRequest`:
 
 ```php
-// Registration
-Route::get('register', RegisterPage::class)->name('register');
-
-// Login
-Route::get('login', LoginPage::class)->name('login');
-
-// Password Reset
-Route::get('forgot-password', RequestPasswordResetPage::class)->name('password.request');
-Route::get('reset-password/{token}', ResetPasswordPage::class)->name('password.reset');
-
-// Email Verification
-Route::get('verify-email', EmailVerificationPromptPage::class)->name('verification.notice');
-Route::get('verify-email/{id}/{hash}', VerifyEmailController::class)->name('verification.verify');
-
-// Logout
-Route::post('logout', [LogoutController::class, 'destroy'])->name('logout');
-```
-
-## Key Components
-
-### User Model
-
-The `User` model extends Laravel's default with additional features:
-
-```php
-class User extends Authenticatable implements MustVerifyEmail
-{
-    use HasApiTokens, HasFactory, Notifiable;
-
-    protected $fillable = [
-        'name',
-        'email',
-        'password',
-    ];
-
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-}
-```
-
-### Authentication Pages
-
-Authentication is handled by Livewire Volt components:
-
-- **Registration**: Full-featured registration form
-- **Login**: Secure login with remember me option
-- **Password Reset**: Email-based password reset flow
-- **Email Verification**: Automated email verification system
-
-## Detailed Guides
-
-Explore specific authentication topics:
-
-- **[Registration](Authentication-Registration)** - User registration process and customization
-- **[Login](Authentication-Login)** - Login functionality and security features  
-- **[Password Reset](Authentication-Password-Reset)** - Password reset flow and email templates
-- **[Email Verification](Authentication-Email-Verification)** - Email verification system
-- **[User Settings](Authentication-User-Settings)** - Profile management and account settings
-- **[Security](Authentication-Security)** - Security features and best practices
-- **[Customization](Authentication-Customization)** - Customizing the authentication system
-
-## Configuration
-
-### Authentication Configuration
-
-Key authentication settings in `config/auth.php`:
-
-```php
-'defaults' => [
-    'guard' => 'web',
-    'passwords' => 'users',
-],
-
-'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
-],
-
-'providers' => [
-    'users' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\User::class,
-    ],
-],
-```
-
-### Email Configuration
-
-Configure email settings for authentication emails:
-
-```env
-MAIL_MAILER=smtp
-MAIL_HOST=your-smtp-host
-MAIL_FROM_ADDRESS=noreply@yourapp.com
-MAIL_FROM_NAME="${APP_NAME}"
-```
-
-### Session Configuration
-
-Configure secure session handling:
-
-```env
-SESSION_DRIVER=database
-SESSION_LIFETIME=120
-SESSION_ENCRYPT=false
-```
-
-## Security Features
-
-### Password Security
-- Passwords are hashed using Laravel's default bcrypt
-- Minimum password requirements enforced
-- Password confirmation required for sensitive operations
-
-### Session Security
-- CSRF protection on all forms
-- Secure session handling
-- Session regeneration on login
-
-### Email Verification
-- Optional email verification for new accounts
-- Secure verification tokens
-- Automatic cleanup of expired tokens
-
-### Rate Limiting
-- Login attempt rate limiting
-- Password reset request limiting
-- Registration rate limiting
-
-## Middleware
-
-### Authentication Middleware
-
-Protected routes use the `auth` middleware:
-
-```php
-Route::middleware('auth')->group(function () {
-    Route::get('/dashboard', DashboardPage::class)->name('dashboard');
-    Route::get('/settings/profile', ProfilePage::class)->name('settings.profile');
-});
-```
-
-### Email Verification Middleware
-
-Routes requiring verified emails use `verified` middleware:
-
-```php
-Route::middleware(['auth', 'verified'])->group(function () {
-    Route::get('/dashboard', DashboardPage::class)->name('dashboard');
-});
-```
-
-## Customization Examples
-
-### Custom Registration Fields
-
-Add additional fields to registration:
-
-```php
-// In registration component
-public string $phone = '';
-
-protected function rules(): array
+// app/Http/Requests/Auth/LoginRequest.php
+public function rules(): array
 {
     return [
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:users',
-        'phone' => 'required|string|max:20',
-        'password' => 'required|string|min:8|confirmed',
+        'email' => ['required', 'string', 'email'],
+        'password' => ['required', 'string'],
     ];
 }
-```
 
-### Custom Login Logic
-
-Override login behavior:
-
-```php
-public function login(): void
+public function authenticate(): void
 {
-    $this->validate();
-    
-    // Custom authentication logic
-    if (Auth::attempt($this->only(['email', 'password']), $this->remember)) {
-        // Log successful login
-        Log::info('User logged in', ['user_id' => Auth::id()]);
-        
-        $this->redirect(intended: route('dashboard'));
+    $this->ensureIsNotRateLimited();
+
+    if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        RateLimiter::hit($this->throttleKey());
+        throw ValidationException::withMessages([
+            'email' => trans('auth.failed'),
+        ]);
     }
-    
-    $this->addError('email', 'Invalid credentials.');
+
+    RateLimiter::clear($this->throttleKey());
 }
 ```
 
-### Custom Email Templates
+5 failed attempts within 1 minute trigger a lockout (rate limited per email + IP).
 
-Customize authentication email templates in `resources/views/emails/`:
+Other actions (register, password reset, etc.) validate inline in the controller — see the source files.
 
-- `verify-email.blade.php` - Email verification
-- `reset-password.blade.php` - Password reset
+## Inertia pages
 
-## Testing Authentication
+Each page lives at `resources/js/pages/auth/*.tsx` and uses Inertia's `useForm` plus `Input`, `Button`, `Checkbox` from `@artisanpack-ui/react/form`:
 
-The starter kit includes comprehensive authentication tests:
+```tsx
+import { useForm } from '@inertiajs/react';
+import { Button, Input } from '@artisanpack-ui/react/form';
+import AuthLayout from '@/layouts/AuthLayout';
+import AuthenticatedSessionController from '@/actions/App/Http/Controllers/Auth/AuthenticatedSessionController';
 
-```bash
-# Run authentication tests
-php artisan test --filter=Authentication
+export default function Login() {
+    const form = useForm({ email: '', password: '', remember: false });
 
-# Test specific authentication features
-php artisan test tests/Feature/Auth/RegistrationTest.php
-php artisan test tests/Feature/Auth/LoginTest.php
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        form.post(AuthenticatedSessionController.store().url, {
+            onFinish: () => form.reset('password'),
+        });
+    }
+
+    return (/* ... form markup ... */);
+}
+
+Login.layout = (page) => <AuthLayout>{page}</AuthLayout>;
 ```
 
-Example test:
+The `AuthLayout` provides the centered card layout, branding, and toast region.
 
-```php
-test('users can register', function () {
-    $response = $this->post('/register', [
-        'name' => 'Test User',
-        'email' => 'test@example.com',
-        'password' => 'password',
-        'password_confirmation' => 'password',
-    ]);
+## Email verification
 
-    $response->assertRedirect('/dashboard');
-    $this->assertAuthenticated();
-});
+The `User` model does **not** implement `MustVerifyEmail` by default. To require verification:
+
+1. Add `implements MustVerifyEmail` to `App\Models\User`
+2. Use the `verified` middleware on routes that require a verified email (the dashboard already does)
+
+## Logout
+
+Triggered by a `POST /logout`. From a React component:
+
+```tsx
+import { router } from '@inertiajs/react';
+
+<button onClick={() => router.post('/logout')}>Log out</button>
 ```
 
-## Troubleshooting
+The `AppLayout` sidebar's user block already wires this up.
 
-### Common Issues
+## Subpages
 
-**Email Verification Not Working**
-- Check mail configuration in `.env`
-- Verify `MAIL_FROM_ADDRESS` is set
-- Check spam/junk folders
-
-**Session Issues**
-- Clear sessions: `php artisan session:table && php artisan migrate`
-- Check session driver configuration
-- Verify storage permissions
-
-**Password Reset Issues**
-- Check mail configuration
-- Verify password reset table exists
-- Check token expiration settings
-
-## Next Steps
-
-- Learn about [User Settings](Authentication-User-Settings) management
-- Explore [Security](Authentication-Security) best practices
-- Review [Customization](Authentication-Customization) options
-- Check [Testing](Testing) authentication features
+- [Login](authentication/login.md)
+- [Registration](authentication/registration.md)
+- [User settings](authentication/user-settings.md)
