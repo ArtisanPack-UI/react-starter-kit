@@ -121,11 +121,23 @@ class OptionalPackagesCommand extends Command
                 ->all();
 
             if (! empty($runtimePackages)) {
-                shell_exec('composer require '.implode(' ', $runtimePackages).' --with-all-dependencies');
+                $exitCode = $this->runComposerRequire($runtimePackages, dev: false);
+
+                if ($exitCode !== 0) {
+                    $this->error(__('Composer failed to install the selected packages. Aborting before scaffold-config runs; run the command again after fixing the dependency conflict.'));
+
+                    return $exitCode;
+                }
             }
 
             if (! empty($devPackages)) {
-                shell_exec('composer require --dev '.implode(' ', $devPackages).' --with-all-dependencies');
+                $exitCode = $this->runComposerRequire($devPackages, dev: true);
+
+                if ($exitCode !== 0) {
+                    $this->error(__('Composer failed to install the selected dev packages. Aborting before scaffold-config runs; run the command again after fixing the dependency conflict.'));
+
+                    return $exitCode;
+                }
             }
 
             $this->info(__('Optional packages installed successfully.'));
@@ -183,6 +195,26 @@ class OptionalPackagesCommand extends Command
         }
 
         return $ok;
+    }
+
+    /**
+     * Run `composer require [--dev] <packages> --with-all-dependencies`,
+     * streaming Composer's output live to the terminal and returning its exit
+     * code so callers can bail on failure. `escapeshellarg()` protects each
+     * package name even though the current list comes from a hard-coded map.
+     *
+     * @param  array<int, string>  $packages
+     */
+    protected function runComposerRequire(array $packages, bool $dev): int
+    {
+        $escaped = implode(' ', array_map('escapeshellarg', $packages));
+        $flag = $dev ? '--dev ' : '';
+
+        $command = 'composer require '.$flag.$escaped.' --with-all-dependencies';
+
+        passthru($command, $exitCode);
+
+        return (int) $exitCode;
     }
 
     /**

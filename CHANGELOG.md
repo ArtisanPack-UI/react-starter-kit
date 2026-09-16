@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [2.0.0] - Unreleased
+Planned as **v2.0.0** — breaking release. Rename this heading to `## [2.0.0] - YYYY-MM-DD` at release time.
 
 ### Added
 
@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `config/database.php` now prefers `Pdo\Mysql::ATTR_SSL_CA` when available (PHP 8.5+) and falls back to `PDO::MYSQL_ATTR_SSL_CA` on 8.3/8.4, silencing the PHP 8.5 deprecation notice on the MySQL and MariaDB connections.
 - `artisanpack:optional-packages-command` now installs `artisanpack-ui/code-style` and `artisanpack-ui/code-style-pint` as `require-dev` dependencies via a partitioned `composer require --dev` call, so they don't leak into production installs.
 - TTY reachability probe `fopen`s `/dev/tty` for read + write instead of relying on `is_readable()`/`is_writable()`, which pass on Linux even when the process has no controlling terminal (`open()` then fails with ENXIO). A failed `rerunWithTty()` now routes back through the "skipping" notice fallback instead of returning the shell's non-zero status.
+- `artisanpack:optional-packages-command` now captures the exit code from each `composer require` call and aborts with an error message + nonzero status instead of silently printing "installed successfully" over a dependency-conflict failure. Composer's own output streams live via `passthru()` so users see what went wrong.
 
 ## [1.0.1] - 2026-04-28
 
