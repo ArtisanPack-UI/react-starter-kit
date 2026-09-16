@@ -26,47 +26,237 @@ class OptionalPackagesCommand extends Command
     protected $description = 'Install optional ArtisanPack UI packages';
 
     /**
+     * Packages that should be installed as `require-dev` dependencies. Anything
+     * not in this list goes into `require`.
+     *
+     * @var array<int, string>
+     */
+    protected array $devOnlyPackages = [
+        'artisanpack-ui/code-style',
+        'artisanpack-ui/code-style-pint',
+    ];
+
+    /**
+     * Optional Composer packages, grouped by category.
+     *
+     * Note: `artisanpack-ui/media-library` is intentionally omitted for the
+     * react starter kit — it currently requires `artisanpack-ui/livewire-ui-components`
+     * and `livewire/livewire`, which would pull the Livewire stack into an
+     * Inertia + React app. Users who want it can `composer require` it manually.
+     *
+     * @var array<string, array<string, string>>
+     */
+    protected array $optionalComposerPackages = [
+        'CMS & Content' => [
+            'artisanpack-ui/cms-framework' => 'CMS Framework — content management + editor',
+            'artisanpack-ui/visual-editor' => 'Visual Editor — Gutenberg-based block editor',
+        ],
+        'Auth & Security' => [
+            'artisanpack-ui/security' => 'Security — sanitization, escaping, 2FA',
+        ],
+        'Integrations' => [
+            'artisanpack-ui/ai' => 'AI — multi-provider AI client with budget guard',
+            'artisanpack-ui/google' => 'Google — OAuth + APIs',
+            'artisanpack-ui/google-business-profile' => 'Google Business Profile — GBP API client',
+            'artisanpack-ui/bing-places' => 'Bing Places — Places API client',
+            'artisanpack-ui/bookings' => 'Bookings — booking flow + calendar sync',
+        ],
+        'Utilities' => [
+            'artisanpack-ui/icons' => 'Icons — extensible icon registration',
+            'artisanpack-ui/hooks' => 'Hooks — WordPress-style actions and filters',
+            'artisanpack-ui/code-style' => 'Code Style — PHPCS standard (dev)',
+            'artisanpack-ui/code-style-pint' => 'Code Style Pint — Pint config (dev)',
+        ],
+    ];
+
+    /**
      * Execute the console command.
      */
     public function handle(): int
     {
         $this->updateProjectName();
 
+        // The Laravel installer invokes `composer create-project --no-interaction`, so
+        // by default this command inherits non-interactive mode and Laravel Prompts
+        // silently falls back to defaults. Re-attach to /dev/tty when possible so the
+        // prompts actually run under `laravel new`.
+        if (! $this->input->isInteractive()) {
+            if (! app()->runningUnitTests() && $this->canReattachTty()) {
+                $exitCode = $this->rerunWithTty();
+
+                if ($exitCode === 0) {
+                    return 0;
+                }
+
+                // Child couldn't reach the terminal (ENXIO on Linux without a
+                // controlling terminal, or similar) — fall through to the notice.
+            }
+
+            $this->warn(__('Skipping interactive optional packages setup (non-interactive mode).'));
+            $this->line(__('Run `php artisan artisanpack:optional-packages-command` after install to choose optional packages and modular structure.'));
+
+            $this->info(__('Scaffolding ArtisanPack configuration...'));
+            $this->call('artisanpack:scaffold-config');
+
+            $this->info(__('Installation complete.'));
+
+            return 0;
+        }
+
+        $composerChoices = $this->buildComposerChoices();
+
         $packages = multiselect(
-            __('Which optional packages would you like to install?'),
-            [
-                'artisanpack-ui/cms-framework',
-                'artisanpack-ui/code-style',
-                'artisanpack-ui/code-style-pint',
-                'artisanpack-ui/icons',
-                'artisanpack-ui/hooks',
-                'artisanpack-ui/media-library',
-            ]
+            label: __('Which optional packages would you like to install?'),
+            options: $composerChoices,
+            hint: __('Space to select, enter to confirm. Category is shown in each label.'),
+            scroll: 15,
         );
 
         if (! empty($packages)) {
-            $this->info('Installing selected optional packages...');
-            $command = 'composer require '.implode(' ', $packages).' --with-all-dependencies';
-            shell_exec($command);
-            $this->info('Optional packages installed successfully.');
+            $this->info(__('Installing selected optional packages...'));
+
+            [$devPackages, $runtimePackages] = collect($packages)
+                ->partition(fn (string $package) => in_array($package, $this->devOnlyPackages, true))
+                ->map(fn ($chunk) => $chunk->values()->all())
+                ->all();
+
+            if (! empty($runtimePackages)) {
+                $exitCode = $this->runComposerRequire($runtimePackages, dev: false);
+
+                if ($exitCode !== 0) {
+                    $this->error(__('Composer failed to install the selected packages. Aborting before scaffold-config runs; run the command again after fixing the dependency conflict.'));
+
+                    return $exitCode;
+                }
+            }
+
+            if (! empty($devPackages)) {
+                $exitCode = $this->runComposerRequire($devPackages, dev: true);
+
+                if ($exitCode !== 0) {
+                    $this->error(__('Composer failed to install the selected dev packages. Aborting before scaffold-config runs; run the command again after fixing the dependency conflict.'));
+
+                    return $exitCode;
+                }
+            }
+
+            $this->info(__('Optional packages installed successfully.'));
         }
 
         $useModularStructure = confirm(
-            __('Would you like to use a modular Laravel structure?'),
-            default: false
+            label: __('Would you like to use a modular Laravel structure?'),
+            default: false,
         );
 
         if ($useModularStructure) {
-            $this->info('Setting up modular Laravel structure...');
+            $this->info(__('Setting up modular Laravel structure...'));
             $this->setupModularStructure();
         }
 
-        $this->info('Scaffolding ArtisanPack configuration...');
+        $this->info(__('Scaffolding ArtisanPack configuration...'));
         $this->call('artisanpack:scaffold-config');
 
-        $this->info('Installation complete.');
+        $this->info(__('Installation complete.'));
 
         return 0;
+    }
+
+    /**
+     * Can this environment re-attach STDIN/STDOUT/STDERR to the user's terminal?
+     * False on Windows, in CI, in Docker without `-t`, or any other environment
+     * where `/dev/tty` isn't reachable.
+     *
+     * `is_readable()`/`is_writable()` are insufficient: on Linux, `/dev/tty`
+     * exists with rw permissions even for processes with no controlling
+     * terminal — but `open()` on it then fails with ENXIO. We actually open
+     * both descriptors here to confirm a real terminal is reachable.
+     */
+    protected function canReattachTty(): bool
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            return false;
+        }
+
+        if (! file_exists('/dev/tty')) {
+            return false;
+        }
+
+        $read = @fopen('/dev/tty', 'rb');
+        $write = @fopen('/dev/tty', 'wb');
+
+        $ok = $read !== false && $write !== false;
+
+        if ($read !== false) {
+            fclose($read);
+        }
+
+        if ($write !== false) {
+            fclose($write);
+        }
+
+        return $ok;
+    }
+
+    /**
+     * Run `composer require [--dev] <packages> --with-all-dependencies`,
+     * streaming Composer's output live to the terminal and returning its exit
+     * code so callers can bail on failure. `escapeshellarg()` protects each
+     * package name even though the current list comes from a hard-coded map.
+     *
+     * @param  array<int, string>  $packages
+     */
+    protected function runComposerRequire(array $packages, bool $dev): int
+    {
+        $escaped = implode(' ', array_map('escapeshellarg', $packages));
+        $flag = $dev ? '--dev ' : '';
+
+        $command = 'composer require '.$flag.$escaped.' --with-all-dependencies';
+
+        passthru($command, $exitCode);
+
+        return (int) $exitCode;
+    }
+
+    /**
+     * Re-invoke this command in a child process with STDIN/STDOUT/STDERR bound
+     * to the user's terminal so `Laravel\Prompts` actually shows prompts. The
+     * child process inherits no `--no-interaction` flag, so it runs the normal
+     * interactive path. Returns the child's exit code.
+     */
+    protected function rerunWithTty(): int
+    {
+        $php = escapeshellarg(PHP_BINARY);
+        $artisan = escapeshellarg(base_path('artisan'));
+
+        $command = sprintf(
+            '%s %s artisanpack:optional-packages-command </dev/tty >/dev/tty 2>/dev/tty',
+            $php,
+            $artisan,
+        );
+
+        passthru($command, $exitCode);
+
+        return (int) $exitCode;
+    }
+
+    /**
+     * Flatten the grouped composer package list into a flat {package => label} map
+     * with the category prepended to the label so users can see which group each
+     * option belongs to inside `multiselect()`.
+     *
+     * @return array<string, string>
+     */
+    protected function buildComposerChoices(): array
+    {
+        $choices = [];
+
+        foreach ($this->optionalComposerPackages as $category => $packages) {
+            foreach ($packages as $package => $label) {
+                $choices[$package] = sprintf('[%s] %s', $category, $label);
+            }
+        }
+
+        return $choices;
     }
 
     /**
