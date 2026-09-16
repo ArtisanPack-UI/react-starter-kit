@@ -2,7 +2,7 @@
 
 A Laravel + React + Inertia.js starter kit using [ArtisanPack UI](https://github.com/ArtisanPack-UI) components.
 
-[![Laravel](https://img.shields.io/badge/Laravel-v12-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
+[![Laravel](https://img.shields.io/badge/Laravel-v13-FF2D20?style=flat&logo=laravel&logoColor=white)](https://laravel.com)
 [![React](https://img.shields.io/badge/React-v19-61DAFB?style=flat&logo=react&logoColor=black)](https://react.dev)
 [![Inertia](https://img.shields.io/badge/Inertia.js-v2-9553E9?style=flat&logo=inertia&logoColor=white)](https://inertiajs.com)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4-38B2AC?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com)
@@ -12,7 +12,7 @@ A Laravel + React + Inertia.js starter kit using [ArtisanPack UI](https://github
 
 ## What's in the box
 
-- **Stack**: Laravel 12, Inertia.js v2, React 19, Tailwind CSS 4, DaisyUI 5
+- **Stack**: Laravel 13 (PHP 8.3+), Inertia.js v2, React 19, Tailwind CSS 4, DaisyUI 5
 - **Components**: [`@artisanpack-ui/react`](https://www.npmjs.com/package/@artisanpack-ui/react) + [`@artisanpack-ui/react-laravel`](https://www.npmjs.com/package/@artisanpack-ui/react-laravel) adapter
 - **Auth**: login, register, forgot/reset password, email verification, password confirmation, account deletion (controllers + Form Requests + Inertia pages)
 - **Settings**: profile, password, appearance (light/dark/system theme)
